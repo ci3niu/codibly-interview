@@ -9,14 +9,30 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.4.8",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "framer-motion": "^6.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.22",
     "@types/react-dom": "^18.0.7",
+    "@typescript-eslint/eslint-plugin": "^5.48.1",
+    "@typescript-eslint/parser": "^5.48.1",
     "@vitejs/plugin-react": "^2.2.0",
-    "typescript": "^4.6.4",
+    "eslint": "^8.31.0",
+    "eslint-config-standard-with-typescript": "^27.0.1",
+    "eslint-config-ts-react-important-stuff": "^3.0.0",
+    "eslint-plugin-import": "^2.27.4",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-n": "^15.6.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-react": "^7.32.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.8.3",
+    "typescript": "^4.9.4",
     "vite": "^3.2.0"
   }
 }
