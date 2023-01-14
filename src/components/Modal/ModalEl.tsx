@@ -3,13 +3,12 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalFooter,
   ModalBody,
-  ModalCloseButton,
   List,
   ListItem,
   Text,
-  Divider
+  Divider,
+  HStack
 } from '@chakra-ui/react';
 import { DataObject } from '../../App.types';
 
@@ -19,7 +18,7 @@ interface BasicModalProps {
   selectedRow?: DataObject;
 }
 
-export const BasicModal: React.FC<BasicModalProps> = ({
+const ModalEl: React.FC<BasicModalProps> = ({
   isOpen,
   onClose,
   selectedRow
@@ -28,7 +27,12 @@ export const BasicModal: React.FC<BasicModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader bg={selectedRow?.color}>
+        <ModalHeader
+          display="flex"
+          bg={selectedRow?.color}
+          alignItems="center"
+          justifyContent="center"
+        >
           {selectedRow?.name.toUpperCase()}
         </ModalHeader>
         <ModalBody>
@@ -37,21 +41,19 @@ export const BasicModal: React.FC<BasicModalProps> = ({
               Object.entries(selectedRow).map(
                 ([key, value]: [string, string | number]) => (
                   <ListItem key={key}>
-                    <Text fontWeight="bold">{key}</Text>
-                    <Text>{value}</Text>
+                    <HStack p="4">
+                      <Text fontWeight="bold">{key}</Text>
+                      <Text>{value}</Text>
+                    </HStack>
                     <Divider orientation="horizontal" />
                   </ListItem>
                 )
               )}
           </List>
         </ModalBody>
-
-        <ModalFooter>
-          <ModalCloseButton colorScheme="blue" mr={3}>
-            Close
-          </ModalCloseButton>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   </>
 );
+
+export default ModalEl;
