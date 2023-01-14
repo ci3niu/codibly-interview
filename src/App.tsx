@@ -1,20 +1,3 @@
-// The goal of the task is to implement SPA application with just one view.
-// You should use the below API endpoint to display the paginated list of products.
-
-// DONE! At the top of the view, there should be text input, which allows the user to filter results by id.
-// DONE! The input should accept only numbers, other signs should not even appear.
-// DONE! Below this input user should see a table displaying the following items’ properties: id, name, and year.
-// DONE! Additionally, the background colour of each row should be taken from the colour property.
-// DONE! After clicking on a row a modal should be displayed and should present all item data.
-// DONE! The table should display 5 items per page.
-// DONE! Under the table, there should be a pagination component, which allows switching between pages with “next” and “previous” arrows.
-
-// TODO: Please remember about handling situations when API endpoint returns a 4XX or 5XX error. In such a case the user should be informed about the error.
-
-// Apart from React, the technology stack totally ups to you, the same applies to styling.
-// As a result of the task, we expect a link to a repository on GitHub, GitLab, or bitbucket.
-// Your app should start after running npm install & npm start.
-
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Heading, VStack, Text } from '@chakra-ui/react';
@@ -60,22 +43,17 @@ const App: React.FC = () => {
       : ([rows?.data] as unknown as DataObject[]);
 
   const handleOnInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (rows && Number(event.target.value) <= rows.total) {
-      setSearchValue(Number(event.target.value));
-    } else {
-      setSearchValue(undefined);
-    }
+    rows && Number(event.target.value) <= rows.total
+      ? setSearchValue(Number(event.target.value))
+      : setSearchValue(undefined);
   };
-
-  const onCloseModalHandler = () => {
+  const handleModalClose = () => {
     setShowModal(false);
   };
-
   const handleClickOnRow = (id: number) => {
     setSelectedRow(parsedData.find((element) => element.id === id));
     setShowModal(true);
   };
-
   const handleChangeToPrevPage = () => {
     currentPage != 1 && setCurrentPage((prevPage) => prevPage - 1);
     setURLParams('page=' + currentPage.toString());
@@ -108,7 +86,7 @@ const App: React.FC = () => {
     <>
       <ModalEl
         isOpen={showModal}
-        onClose={onCloseModalHandler}
+        onClose={handleModalClose}
         selectedRow={selectedRow}
       />
       <VStack direction="column" w="100vw" h="100vh" p="4" bg="#ddd">
