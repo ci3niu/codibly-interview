@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Heading, VStack, Text } from '@chakra-ui/react';
+import { useDebounce } from './hooks/useDebounce';
 import { Data, DataObject } from './App.types';
 
+import { Heading, VStack, Text } from '@chakra-ui/react';
 import InputEl from './components/Input/InputEl';
 import TableEl from './components/Table/TableEl';
 import ModalEl from './components/Modal/ModalEl';
 import Pagination from './components/Pagination/Pagination';
+import NoMatch from './components/NoMatch/NoMatch';
 
 const App: React.FC = () => {
   const [rows, setRows] = useState<Data>();
@@ -15,23 +17,27 @@ const App: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isError, setIsError] = useState<boolean>(false);
-  const [URLParams, setURLParams] = useSearchParams();
+  const [noMatch, setNoMatch] = useState<boolean>(false);
+
+  const [, setURLParams] = useSearchParams('page=1');
+  const debounceValue = useDebounce(searchValue, 250);
 
   const getData = useCallback(async () => {
     try {
       const searchParams = new URLSearchParams();
       searchParams.append('per_page', '5');
       searchParams.append('page', currentPage.toString());
-      searchValue && searchParams.append('id', searchValue.toString());
+      debounceValue && searchParams.append('id', debounceValue.toString());
 
       const apiUrl = `https://reqres.in/api/products?${searchParams.toString()}`;
       const res = await fetch(apiUrl);
       const resData = await res.json();
       setRows(resData);
+      setURLParams('page=' + currentPage.toString());
     } catch (error) {
       setIsError(true);
     }
-  }, [searchValue, currentPage]);
+  }, [currentPage, debounceValue, setURLParams]);
 
   useEffect(() => {
     getData();
@@ -43,8 +49,15 @@ const App: React.FC = () => {
       : ([rows?.data] as unknown as DataObject[]);
 
   const handleOnInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    rows && Number(event.target.value) <= rows.total
-      ? setSearchValue(Number(event.target.value))
+    const inputValue = event.target.value;
+    setCurrentPage(1);
+
+    rows && (Number(inputValue) > rows.total || inputValue === '0')
+      ? setNoMatch(true)
+      : setNoMatch(false);
+
+    rows && Number(inputValue) <= rows.total
+      ? setSearchValue(Number(inputValue))
       : setSearchValue(undefined);
   };
   const handleModalClose = () => {
@@ -54,15 +67,13 @@ const App: React.FC = () => {
     setSelectedRow(parsedData.find((element) => element.id === id));
     setShowModal(true);
   };
+
   const handleChangeToPrevPage = () => {
-    currentPage != 1 && setCurrentPage((prevPage) => prevPage - 1);
-    setURLParams('page=' + currentPage.toString());
+    currentPage !== 1 && setCurrentPage((prevPage) => prevPage - 1);
   };
   const handleChangeToNextPage = () => {
-    if (rows) {
-      currentPage < rows?.total_pages &&
-        setCurrentPage((prevPage) => prevPage + 1);
-      setURLParams('page=' + currentPage.toString());
+    if (rows && currentPage < rows.total_pages) {
+      setCurrentPage((prevPage) => prevPage + 1);
     }
   };
 
@@ -74,7 +85,7 @@ const App: React.FC = () => {
       </VStack>
     );
   }
-  if (rows === undefined) {
+  if (!isError && rows === undefined) {
     return (
       <VStack w="100vw" h="100vh" alignItems="center" justifyContent="center">
         <Heading>Loading data...</Heading>
@@ -90,14 +101,27 @@ const App: React.FC = () => {
         selectedRow={selectedRow}
       />
       <VStack direction="column" w="100vw" h="100vh" p="4" bg="#ddd">
-        <InputEl handleOnChange={handleOnInputChange} />
-        <TableEl parsedData={parsedData} handleClickOnRow={handleClickOnRow} />
-        {!searchValue && (
-          <Pagination
-            page={currentPage}
-            onPrev={handleChangeToPrevPage}
-            onNext={handleChangeToNextPage}
-          />
+        <InputEl
+          handleOnChange={handleOnInputChange}
+          searchValue={searchValue}
+        />
+
+        {noMatch ? (
+          <NoMatch />
+        ) : (
+          <>
+            <TableEl
+              parsedData={parsedData}
+              handleClickOnRow={handleClickOnRow}
+            />
+            {!searchValue && (
+              <Pagination
+                page={currentPage}
+                onPrev={handleChangeToPrevPage}
+                onNext={handleChangeToNextPage}
+              />
+            )}
+          </>
         )}
       </VStack>
     </>
