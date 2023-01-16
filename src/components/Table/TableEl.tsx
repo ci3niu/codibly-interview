@@ -10,7 +10,7 @@ import {
 import { DataObject } from '../../App.types';
 
 interface TableElProps {
-  parsedData: DataObject[];
+  parsedData?: DataObject[];
   handleClickOnRow: (id: number) => void;
 }
 
@@ -26,7 +26,7 @@ const TableEl: React.FC<TableElProps> = ({ parsedData, handleClickOnRow }) => {
           </Tr>
         </Thead>
         <Tbody>
-          {parsedData.map(({ id, name, year, color }) => (
+          {parsedData?.map(({ id, name, year, color }) => (
             <Tr
               onClick={() => {
                 handleClickOnRow(id);
