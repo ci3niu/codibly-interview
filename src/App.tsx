@@ -66,7 +66,6 @@ const App: React.FC = () => {
 
   const handleOnInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(event.target.value);
-    setCurrentPage(1);
   };
   const handleModalClose = () => {
     setShowModal(false);
