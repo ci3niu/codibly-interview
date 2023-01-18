@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useDebounce } from './hooks/useDebounce';
-import { Data, DataObject } from './App.types';
+import { useEffect, useState } from 'react';
+import { DataObject } from './App.types';
+import { useGetData } from './hooks/useGetData';
 
 import { Heading, VStack } from '@chakra-ui/react';
 import InputEl from './components/Input/InputEl';
@@ -11,48 +10,12 @@ import Pagination from './components/Pagination/Pagination';
 import NoMatch from './components/NoMatch/NoMatch';
 
 const App: React.FC = () => {
-  const [rows, setRows] = useState<Data>();
-  const [selectedRow, setSelectedRow] = useState<DataObject>();
   const [searchValue, setSearchValue] = useState<string>();
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isError, setIsError] = useState<boolean>(false);
+  const { rows, isError, URLParams } = useGetData(searchValue, currentPage);
 
-  const [URLParams, setURLParams] = useSearchParams('page=1&id=');
-
-  const debounceValue = useDebounce(searchValue, 250);
-
-  const getData = useCallback(async () => {
-    try {
-      const searchParams = new URLSearchParams();
-      searchParams.append('per_page', '5');
-      searchParams.append('page', currentPage.toString());
-      debounceValue && searchParams.append('id', debounceValue);
-
-      const apiUrl = `https://reqres.in/api/products?${searchParams.toString()}`;
-      const res = await fetch(apiUrl);
-
-      if (!res.ok) {
-        setIsError(true);
-      } else {
-        const resData = await res.json();
-        setRows(resData);
-
-        const newUrlParams = new URLSearchParams();
-        newUrlParams.append('page', currentPage.toString());
-        if (debounceValue) newUrlParams.append('id', debounceValue.toString());
-        setURLParams(newUrlParams);
-
-        setIsError(false);
-      }
-    } catch (error) {
-      setIsError(true);
-    }
-  }, [currentPage, debounceValue, setURLParams]);
-
-  useEffect(() => {
-    getData();
-  }, [getData]);
+  const [selectedRow, setSelectedRow] = useState<DataObject>();
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (URLParams.get('page')) {
@@ -105,11 +68,6 @@ const App: React.FC = () => {
 
   return (
     <>
-      <ModalEl
-        isOpen={showModal}
-        onClose={handleModalClose}
-        selectedRow={selectedRow}
-      />
       <VStack direction="column" w="100vw" h="100vh" p="4" bg="#ddd">
         <InputEl handleOnChange={handleOnInputChange} />
 
@@ -130,6 +88,11 @@ const App: React.FC = () => {
             )}
           </>
         )}
+        <ModalEl
+          isOpen={showModal}
+          onClose={handleModalClose}
+          selectedRow={selectedRow}
+        />
       </VStack>
     </>
   );
